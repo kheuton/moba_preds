@@ -39,15 +39,15 @@ def run_model(data_dir=None,log_dir=None, embedding_size=None, dropout_rate=None
     train_frac = 0.8
     validate_frac = 0.1
     n_train = int(train_frac * n_data)
-    n_test = int(validate_frac * n_data)
+    n_val = int(validate_frac * n_data)
     train_rows = shuffled_rows[:n_train]
-    test_rows = shuffled_rows[n_train:]
+    val_rows = shuffled_rows[n_train:n_train+n_val]
 
     train_data = labeled_data.iloc[train_rows, :]
-    test_data = labeled_data.iloc[test_rows, :]
+    val_data = labeled_data.iloc[val_rows, :]
 
     train_radiant, train_dire, train_y = get_heroes_and_winner(train_data)
-    test_radiant, test_dire, test_y = get_heroes_and_winner(test_data)
+    val_radiant, val_dire, val_y = get_heroes_and_winner(val_data)
 
     win_rates = get_win_rates(train_radiant, train_dire, train_y, n_train)
 
@@ -55,8 +55,8 @@ def run_model(data_dir=None,log_dir=None, embedding_size=None, dropout_rate=None
 
     radiant_avg_wr = np.zeros(n_train)
     dire_avg_wr = np.zeros(n_train)
-    test_radiant_wr = np.zeros(n_test)
-    test_dire_wr = np.zeros(n_test)
+    val_radiant_wr = np.zeros(n_val)
+    val_dire_wr = np.zeros(n_val)
 
     for row in range(n_train):
         radiant = train_radiant.iloc[row, :]
@@ -71,9 +71,9 @@ def run_model(data_dir=None,log_dir=None, embedding_size=None, dropout_rate=None
         radiant_avg_wr[row] = radiant_avg
         dire_avg_wr[row] = dire_avg
 
-    for row in range(n_test):
-        radiant = test_radiant.iloc[row, :]
-        dire = test_dire.iloc[row, :]
+    for row in range(n_val):
+        radiant = val_radiant.iloc[row, :]
+        dire = val_dire.iloc[row, :]
 
         radiant_winrates = [win_rates[hero] for hero in radiant]
         dire_winrates = [win_rates[hero] for hero in dire]
@@ -81,8 +81,8 @@ def run_model(data_dir=None,log_dir=None, embedding_size=None, dropout_rate=None
         radiant_avg = np.mean(radiant_winrates)
         dire_avg = np.mean(dire_winrates)
 
-        test_radiant_wr[row] = radiant_avg
-        test_dire_wr[row] = dire_avg
+        val_radiant_wr[row] = radiant_avg
+        val_dire_wr[row] = dire_avg
 
     model = EmbeddingModel(pool_size=112, embedding_size=embedding_size, dropout_rate=dropout_rate,
                            n_hidden_predictor=n_hidden_predictor, activation=activation)
@@ -104,9 +104,9 @@ def run_model(data_dir=None,log_dir=None, embedding_size=None, dropout_rate=None
               callbacks=callbacks, shuffle=True,
               batch_size=batch_size, epochs=10000,
               validation_data=
-              ([tf.cast(test_radiant, dtype=tf.int32), tf.cast(test_dire, dtype=tf.int32),
-                tf.cast(test_radiant_wr, dtype=tf.float32), tf.cast(test_dire_wr, dtype=tf.float32)],
-               tf.cast(test_y.astype(int), dtype=tf.float32)))
+              ([tf.cast(val_radiant, dtype=tf.int32), tf.cast(val_dire, dtype=tf.int32),
+                tf.cast(val_radiant_wr, dtype=tf.float32), tf.cast(val_dire_wr, dtype=tf.float32)],
+               tf.cast(val_y.astype(int), dtype=tf.float32)))
 
 class EmbeddingModel(tf.keras.Model):
     def __init__(self, pool_size=123, embedding_size=32, team_size=5,
