@@ -8,5 +8,5 @@
 #SBATCH --export=ALL        # Pass any exported env vars to this script and its children
 
 
-python  run_experiment.py $args
+python  test_run.py $args
 
