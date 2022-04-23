@@ -8,7 +8,7 @@ from collections import defaultdict
 
 
 
-def run_model(data_dir=None, embedding_size=None, dropout_rate=None, activation=None, learning_rate=None,
+def run_model(data_dir=None,log_dir=None embedding_size=None, dropout_rate=None, activation=None, learning_rate=None,
               n_hidden_predictor=None, batch_size=None):
     """Main model fitting function
      All args have defaults set by argparser"""
