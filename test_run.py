@@ -16,9 +16,8 @@ def run_model(data_dir=None,log_dir=None, embedding_size=None, dropout_rate=None
     train_path = os.path.join(data_dir, 'train.csv')
     hero_path = os.path.join(data_dir, 'hero_names.json')
 
-    with open('hero_names.json', 'r') as file:
+    with open(hero_path, 'r') as file:
         hero_names = json.load(file)
-    pd.DataFrame(hero_names.values())
 
     labeled_data = pd.read_csv(train_path)
     no_winner = labeled_data['radiant_win'].isna()
