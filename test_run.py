@@ -170,6 +170,8 @@ def get_win_rates(train_radiant, train_dire, train_y, n_train):
     for hero in win_counts.keys():
         win_rates[hero] = win_counts[hero] / game_counts[hero]
 
+    return win_rates
+
 
 def get_heroes_and_winner(df):
     radiant_cols = [f'r{idx}_hero' for idx in range(1,6)]
