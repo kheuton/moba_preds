@@ -194,7 +194,7 @@ if __name__ == '__main__':
     parser.add_argument('--embedding_size', help='Size of hero embedding', type=int, default=32)
     parser.add_argument('--n_hidden_predictor', help='Units in hidden layer of prediction_head', type=int, default=128)
     parser.add_argument('--dropout_rate', help='Dropout rate, 0-1', type=float, default=0)
-    parser.add_argument('--activation', help='Hidden layer activation in prediction head', type='str', default='tanh')
+    parser.add_argument('--activation', help='Hidden layer activation in prediction head', type=str, default='tanh')
     parser.add_argument('--learning_rate', default=1e-4)
     parser.add_argument('--batch_size', default=8196)
 
