@@ -95,7 +95,7 @@ def run_model(data_dir=None,log_dir=None, embedding_size=None, dropout_rate=None
     callbacks = [tf.keras.callbacks.TensorBoard(log_dir=log_dir),
                  tf.keras.callbacks.CSVLogger(csv_logs)]
 
-    optimizer = tf.keras.optimizers.Adam(1e-4)
+    optimizer = tf.keras.optimizers.Adam(learning_rate)
     model.compile(optimizer=optimizer, loss=loss, metrics=[tf.metrics.BinaryAccuracy()])
 
     model.fit(x=[tf.cast(train_radiant, dtype=tf.int32), tf.cast(train_dire, dtype=tf.int32),
