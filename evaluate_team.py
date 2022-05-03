@@ -67,7 +67,7 @@ if __name__ == '__main__':
         if hero.lower() not in [name.lower() for name in hero_names_in_data]:
             raise ValueError(f'{hero} is not in the game, please try again.')
         dire.append(hero.lower())
-
+    
     radiant_ids = [hero_name_info[hero]['id'] - 1 for hero in radiant]
     dire_ids = [hero_name_info[hero]['id'] - 1 for hero in dire]
 
@@ -85,18 +85,26 @@ if __name__ == '__main__':
     radiant_pred_wr = radiant_wr_tensor.numpy()[0][0]
     print(f'Radiant have an expected {100 * radiant_pred_wr:.2f}% win rate')
 
-    win_prediction_dict = dict()
-    for hero_id in hero_ids_in_data:
-        if hero_id not in radiant_ids and hero_id not in dire_ids:
-            radiant_ids_with_sub = [int(hero_id)] + radiant_ids[1:]
-            radiant_wr = model(
-                [tf.expand_dims(tf.cast(radiant_ids_with_sub, dtype=tf.int32), 0), tf.expand_dims(tf.cast(dire_ids, dtype=tf.int32), 0),
-                tf.expand_dims(tf.expand_dims(tf.cast(radiant_avg, dtype=tf.float32), 0), 0),
-                tf.expand_dims(tf.expand_dims(tf.cast(dire_avg, dtype=tf.float32), 0), 0)]).numpy()[0][0]
-            win_prediction_dict[hero_id_info[int(hero_id)+1]['localized_name']] = radiant_wr
+    all_win_pred = dict()
+    for slot in range(5): 
+        win_prediction_dict = dict()
+        for hero_id in hero_ids_in_data:
+            if hero_id not in radiant_ids and hero_id not in dire_ids:
+                radiant_ids_with_sub = radiant_ids[:slot]  + [int(hero_id)] + radiant_ids[slot+1:]
+                radiant_wr = model(
+                    [tf.expand_dims(tf.cast(radiant_ids_with_sub, dtype=tf.int32), 0), tf.expand_dims(tf.cast(dire_ids, dtype=tf.int32), 0),
+                    tf.expand_dims(tf.expand_dims(tf.cast(radiant_avg, dtype=tf.float32), 0), 0),
+                    tf.expand_dims(tf.expand_dims(tf.cast(dire_avg, dtype=tf.float32), 0), 0)]).numpy()[0][0]
+                win_prediction_dict[hero_id_info[int(hero_id)+1]['localized_name']] = radiant_wr
+        items = sorted(win_prediction_dict.items(), key=lambda x: x[1], reverse=True)
+
+        for swap in items:
+            all_win_pred[f'{slot}-{swap[0]}'] = swap[1]
     
-    items = sorted(win_prediction_dict.items(), key=lambda x: x[1], reverse=True)
-    print("Top 5 recommended swaps for Radiant player 1")
-    for item in items[:5]:
-        print(item)
+    items = sorted(all_win_pred.items(), key=lambda x: x[1], reverse=True)
+
+    print("Top 10 recommended swaps for Radiant:")
+    for item in items[:10]:
+        player, hero = item[0].split("-")
+        print(f'Swap player {int(player) + 1} from {radiant[int(player)].capitalize()} to {hero} expected winrate: {100 * item[1]:.2f}%')
 
