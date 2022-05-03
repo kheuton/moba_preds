@@ -70,6 +70,7 @@ if __name__ == '__main__':
 
     radiant_ids = [hero_name_info[hero]['id'] - 1 for hero in radiant]
     dire_ids = [hero_name_info[hero]['id'] - 1 for hero in dire]
+
     radiant_winrates = [win_rates[str(hero)] for hero in radiant_ids]
     dire_winrates = [win_rates[str(hero)] for hero in dire_ids]
 
@@ -83,3 +84,19 @@ if __name__ == '__main__':
          tf.expand_dims(tf.expand_dims(tf.cast(dire_avg, dtype=tf.float32), 0), 0)])
     radiant_pred_wr = radiant_wr_tensor.numpy()[0][0]
     print(f'Radiant have an expected {100 * radiant_pred_wr:.2f}% win rate')
+
+    win_prediction_dict = dict()
+    for hero_id in hero_ids_in_data:
+        if hero_id not in radiant_ids and hero_id not in dire_ids:
+            radiant_ids_with_sub = [int(hero_id)] + radiant_ids[1:]
+            radiant_wr = model(
+                [tf.expand_dims(tf.cast(radiant_ids_with_sub, dtype=tf.int32), 0), tf.expand_dims(tf.cast(dire_ids, dtype=tf.int32), 0),
+                tf.expand_dims(tf.expand_dims(tf.cast(radiant_avg, dtype=tf.float32), 0), 0),
+                tf.expand_dims(tf.expand_dims(tf.cast(dire_avg, dtype=tf.float32), 0), 0)]).numpy()[0][0]
+            win_prediction_dict[hero_id_info[int(hero_id)+1]['localized_name']] = radiant_wr
+    
+    items = sorted(win_prediction_dict.items(), key=lambda x: x[1], reverse=True)
+    print("Top 5 recommended swaps for Radiant player 1")
+    for item in items[:5]:
+        print(item)
+
